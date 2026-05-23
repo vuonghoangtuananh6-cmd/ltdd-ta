@@ -1,0 +1,6 @@
+{
+  "name": "StayEase",
+  "description": "StayEase is a hotel and room booking app with search filters, booking history, reviews, admin dashboard, and AI travel assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
