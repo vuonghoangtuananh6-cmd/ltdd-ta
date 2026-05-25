@@ -85,10 +85,12 @@ fun HomeScreen(
     var guests by remember { mutableIntStateOf(viewModel.guestsCount.value) }
     var rooms by remember { mutableIntStateOf(viewModel.roomsCount.value) }
 
+    val isEn = currentUser.language == "EN"
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppBackground) // Cool light background
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -101,7 +103,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .shadow(elevation = 2.dp, shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
-                colors = CardDefaults.cardColors(containerColor = CardBackground),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
             ) {
                 Column(
@@ -135,7 +137,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "StayHub",
-                                color = StayHubBlue900,
+                                color = if (currentUser.isDarkMode) Color.White else StayHubBlue900,
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -148,12 +150,12 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .size(38.dp)
                                     .clip(CircleShape)
-                                    .background(StayHubBlue50)
+                                    .background(if (currentUser.isDarkMode) Color(0xFF334155) else StayHubBlue50)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Notifications,
                                     contentDescription = "Notifications",
-                                    tint = StayHubBlue700,
+                                    tint = if (currentUser.isDarkMode) Color(0xFFF97316) else StayHubBlue700,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -163,12 +165,12 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .size(38.dp)
                                     .clip(CircleShape)
-                                    .background(StayHubBlue50)
+                                    .background(if (currentUser.isDarkMode) Color(0xFF334155) else StayHubBlue50)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Chat,
                                     contentDescription = "Support Chat",
-                                    tint = StayHubBlue700,
+                                    tint = if (currentUser.isDarkMode) Color(0xFFF97316) else StayHubBlue700,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -187,8 +189,8 @@ fun HomeScreen(
             ) {
                 Column {
                     Text(
-                        text = "Chào, ${currentUser.name} \uD83D\uDC4B",
-                        color = Slate900,
+                        text = if (isEn) "Hello, ${currentUser.name} \uD83D\uDC4B" else "Chào, ${currentUser.name} \uD83D\uDC4B",
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -202,7 +204,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Điểm Gold: ${currentUser.loyaltyPoints} | VIP Member",
+                            text = if (isEn) "Gold Points: ${currentUser.loyaltyPoints} | VIP Member" else "Điểm Gold: ${currentUser.loyaltyPoints} | VIP Member",
                             color = AccentOrange,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
@@ -354,16 +356,16 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackground),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                border = BorderStroke(1.dp, Slate200)
+                border = BorderStroke(1.dp, if (currentUser.isDarkMode) Color(0xFF334155) else Slate200)
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Đặt Phòng Khách Sạn & Resort",
-                        color = Slate900,
+                        text = if (isEn) "Book Hotels & Resorts" else "Đặt Phòng Khách Sạn & Resort",
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 12.dp)
@@ -377,16 +379,16 @@ fun HomeScreen(
                         OutlinedTextField(
                             value = locationInput,
                             onValueChange = { locationInput = it },
-                            label = { Text("Điểm đến / Tên khách sạn", color = Slate500) },
-                            placeholder = { Text("Nhập địa điểm (ví dụ: Hà Nội)", color = Slate400) },
+                            label = { Text(if (isEn) "Destination / Hotel" else "Điểm đến / Tên khách sạn", color = Slate500) },
+                            placeholder = { Text(if (isEn) "Enter location (e.g. Ha Noi)" else "Nhập địa điểm (ví dụ: Hà Nội)", color = Slate400) },
                             leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = "Location", tint = StayHubBlue600) },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = StayHubBlue600,
-                                unfocusedBorderColor = Slate300,
-                                focusedTextColor = Slate900,
-                                unfocusedTextColor = Slate800,
-                                focusedContainerColor = Slate100,
-                                unfocusedContainerColor = Slate100
+                                unfocusedBorderColor = if (currentUser.isDarkMode) Color(0xFF475569) else Slate300,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedContainerColor = if (currentUser.isDarkMode) Color(0xFF0F172A) else Slate100,
+                                unfocusedContainerColor = if (currentUser.isDarkMode) Color(0xFF0F172A) else Slate100
                             ),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
@@ -402,10 +404,10 @@ fun HomeScreen(
                             modifier = Modifier
                                 .size(50.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(StayHubBlue100)
+                                .background(if (currentUser.isDarkMode) Color(0xFF334155) else StayHubBlue100)
                                 .clickable {
                                     showVoiceDialog = true
-                                    voiceMessageState = "Đang nghe..."
+                                    voiceMessageState = if (isEn) "Listening..." else "Đang nghe..."
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -428,16 +430,16 @@ fun HomeScreen(
                             onClick = { showCheckInPicker = true },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Slate100),
-                            border = BorderStroke(1.dp, Slate200)
+                            colors = CardDefaults.cardColors(containerColor = if (currentUser.isDarkMode) Color(0xFF1E293B) else Slate100),
+                            border = BorderStroke(1.dp, if (currentUser.isDarkMode) Color(0xFF334155) else Slate200)
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Text("Nhận phòng", color = Slate500, fontSize = 11.sp)
+                                Text(if (isEn) "Check-in" else "Nhận phòng", color = Slate500, fontSize = 11.sp)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.DateRange, contentDescription = null, tint = StayHubBlue600, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text(checkIn, color = Slate900, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                    Text(checkIn, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -446,16 +448,16 @@ fun HomeScreen(
                             onClick = { showCheckInPicker = true },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Slate100),
-                            border = BorderStroke(1.dp, Slate200)
+                            colors = CardDefaults.cardColors(containerColor = if (currentUser.isDarkMode) Color(0xFF1E293B) else Slate100),
+                            border = BorderStroke(1.dp, if (currentUser.isDarkMode) Color(0xFF334155) else Slate200)
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Text("Trả phòng", color = Slate500, fontSize = 11.sp)
+                                Text(if (isEn) "Check-out" else "Trả phòng", color = Slate500, fontSize = 11.sp)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.DateRange, contentDescription = null, tint = StayHubBlue600, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text(checkOut, color = Slate900, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                    Text(checkOut, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -468,8 +470,8 @@ fun HomeScreen(
                         onClick = { showGuestsPicker = true },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Slate100),
-                        border = BorderStroke(1.dp, Slate200)
+                        colors = CardDefaults.cardColors(containerColor = if (currentUser.isDarkMode) Color(0xFF1E293B) else Slate100),
+                        border = BorderStroke(1.dp, if (currentUser.isDarkMode) Color(0xFF334155) else Slate200)
                     ) {
                         Row(
                             modifier = Modifier
@@ -479,12 +481,17 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text("Khách & Phòng", color = Slate500, fontSize = 11.sp)
+                                Text(if (isEn) "Guests & Rooms" else "Khách & Phòng", color = Slate500, fontSize = 11.sp)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.People, contentDescription = null, tint = StayHubBlue600, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text("$guests khách, $rooms phòng", color = Slate900, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        text = if (isEn) "$guests guests, $rooms rooms" else "$guests khách, $rooms phòng",
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
                             }
                             Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, tint = Slate500)
@@ -515,7 +522,7 @@ fun HomeScreen(
                     ) {
                         Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("TÌM PHÒNG NGAY", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(if (isEn) "FIND ROOMS NOW" else "TÌM PHÒNG NGAY", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }
@@ -528,7 +535,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // Featured/Popular list of Hotels (Khách sạn nổi bật)
-            RowHeaderWidget("Khách sạn nổi bật \uD83D\uDD25", onViewAll = {
+            RowHeaderWidget(if (isEn) "Featured Hotels \uD83D\uDD25" else "Khách sạn nổi bật \uD83D\uDD25", isEn = isEn, onViewAll = {
                 locationInput = ""
                 viewModel.setCity("")
                 onNavigateToSearchResults()
@@ -547,7 +554,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Suggested destination category grid
-            RowHeaderWidget("Gợi ý điểm đến phổ biến", onViewAll = {})
+            RowHeaderWidget(if (isEn) "Popular Destinations" else "Gợi ý điểm đến phổ biến", isEn = isEn, onViewAll = {})
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -606,7 +613,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Regular hotels block
-            RowHeaderWidget("Dành cho bạn gần đây", onViewAll = {
+            RowHeaderWidget(if (isEn) "Recommended for You" else "Dành cho bạn gần đây", isEn = isEn, onViewAll = {
                 locationInput = ""
                 viewModel.setCity("")
                 onNavigateToSearchResults()
@@ -627,7 +634,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // All Hotels list block
-            RowHeaderWidget("Tất cả khách sạn \uD83C\uDFE8", onViewAll = {
+            RowHeaderWidget(if (isEn) "All Hotels \uD83C\uDFE8" else "Tất cả khách sạn \uD83C\uDFE8", isEn = isEn, onViewAll = {
                 locationInput = ""
                 viewModel.setCity("")
                 onNavigateToSearchResults()
@@ -1149,7 +1156,7 @@ fun AISmartTravelWidget(onLocationSelected: (String) -> Unit) {
 }
 
 @Composable
-fun RowHeaderWidget(title: String, onViewAll: () -> Unit) {
+fun RowHeaderWidget(title: String, isEn: Boolean = false, onViewAll: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1157,9 +1164,9 @@ fun RowHeaderWidget(title: String, onViewAll: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, color = Slate900, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(title, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         Text(
-            "Xem tất cả",
+            if (isEn) "See all" else "Xem tất cả",
             color = StayHubBlue700,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,

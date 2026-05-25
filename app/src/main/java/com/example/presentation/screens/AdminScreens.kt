@@ -36,6 +36,47 @@ fun AdminDashboardScreen(
     viewModel: HotelViewModel,
     onBack: () -> Unit
 ) {
+    val currentUser by viewModel.currentUser.collectAsState()
+
+    if (currentUser.role != "ADMIN") {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(64.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Quyền truy cập bị từ chối / Access Denied",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Chỉ tài khoản admin mới có quyền truy cập trang này.",
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(onClick = onBack) {
+                    Text("Quay lại")
+                }
+            }
+        }
+        return
+    }
+
     val stats by viewModel.adminStats.collectAsState(initial = emptyMap())
     val hotelsList by viewModel.repository.hotels.collectAsState()
     val roomsList by viewModel.repository.rooms.collectAsState()

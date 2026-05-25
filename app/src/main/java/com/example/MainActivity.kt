@@ -37,7 +37,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyApplicationTheme {
+            val currentUser by viewModel.currentUser.collectAsState()
+            MyApplicationTheme(darkTheme = currentUser.isDarkMode) {
                 MainAppHost(viewModel = viewModel)
             }
         }
@@ -48,6 +49,8 @@ class MainActivity : ComponentActivity() {
 fun MainAppHost(viewModel: HotelViewModel) {
     val navController = rememberNavController()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+    val currentUser by viewModel.currentUser.collectAsState()
+    val isEn = currentUser.language == "EN"
 
     // Monitor current backstack entry to control whether to show Bottom Navigation standard bar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -59,11 +62,11 @@ fun MainAppHost(viewModel: HotelViewModel) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppBackground),
+            .background(MaterialTheme.colorScheme.background),
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar(
-                    containerColor = CardBackground,
+                    containerColor = MaterialTheme.colorScheme.surface,
                     tonalElevation = 6.dp,
                     modifier = Modifier
                         .navigationBarsPadding()
@@ -78,8 +81,8 @@ fun MainAppHost(viewModel: HotelViewModel) {
                                 }
                             }
                         },
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Trang chủ") },
-                        label = { Text("Trang chủ", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        icon = { Icon(Icons.Default.Home, contentDescription = if (isEn) "Home" else "Trang chủ") },
+                        label = { Text(if (isEn) "Home" else "Trang chủ", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = StayHubBlue700,
                             selectedTextColor = StayHubBlue700,
@@ -99,8 +102,8 @@ fun MainAppHost(viewModel: HotelViewModel) {
                                 }
                             }
                         },
-                        icon = { Icon(Icons.Default.ReceiptLong, contentDescription = "Sổ đặt phòng") },
-                        label = { Text("Đặt phòng", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        icon = { Icon(Icons.Default.ReceiptLong, contentDescription = if (isEn) "Bookings" else "Sổ đặt phòng") },
+                        label = { Text(if (isEn) "Bookings" else "Đặt phòng", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = StayHubBlue700,
                             selectedTextColor = StayHubBlue700,
@@ -120,8 +123,8 @@ fun MainAppHost(viewModel: HotelViewModel) {
                                 }
                             }
                         },
-                        icon = { Icon(Icons.Default.Favorite, contentDescription = "Yêu thích") },
-                        label = { Text("Yêu thích", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        icon = { Icon(Icons.Default.Favorite, contentDescription = if (isEn) "Wishlist" else "Yêu thích") },
+                        label = { Text(if (isEn) "Wishlist" else "Yêu thích", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = StayHubBlue700,
                             selectedTextColor = StayHubBlue700,
@@ -141,8 +144,8 @@ fun MainAppHost(viewModel: HotelViewModel) {
                                 }
                             }
                         },
-                        icon = { Icon(Icons.Default.Person, contentDescription = "Cá nhân") },
-                        label = { Text("Cá nhân", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        icon = { Icon(Icons.Default.Person, contentDescription = if (isEn) "Profile" else "Cá nhân") },
+                        label = { Text(if (isEn) "Profile" else "Cá nhân", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = StayHubBlue700,
                             selectedTextColor = StayHubBlue700,

@@ -4,45 +4,36 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.model.*
-import com.example.data.repository.HotelRepository
+import com.example.data.repository.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-sealed class AuthResult {
-    object Success : AuthResult()
-    data class Error(val message: String) : AuthResult()
-    object VerificationRequired : AuthResult()
-}
-
 class HotelViewModel(application: Application) : AndroidViewModel(application) {
-    val repository = HotelRepository(application)
+    val userRepository = UserRepositoryImpl(application)
+    val bookingRepository = BookingRepositoryImpl(application)
+    val favoriteRepository = FavoriteRepositoryImpl(application)
+    val hotelRepository = HotelRepositoryImpl(application)
+
+    // Expose repository for compatibility
+    val repository: HotelRepository = hotelRepository
 
     // User authentication state simulation
-    private val _isLoggedIn = MutableStateFlow(false)
-    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+    val isLoggedIn: StateFlow<Boolean> = AuthViewModel.isLoggedInState
 
-    init {
-        val prefs = application.getSharedPreferences("StayEase_Prefs", android.content.Context.MODE_PRIVATE)
-        val savedLoggedIn = prefs.getBoolean("remember_me_login", false)
-        if (savedLoggedIn) {
-            _isLoggedIn.value = true
-        }
-    }
-
-    // Advanced Auth Flow Functions
+    // Authentication Functions
     fun registerWithDetails(name: String, email: String, phone: String, pass: String): AuthResult {
-        repository.registerUserAccount(name, email, phone, pass)
+        userRepository.registerUserAccount(name, email, phone, pass)
         return AuthResult.VerificationRequired
     }
 
     fun loginWithDetails(email: String, pass: String, rememberMe: Boolean): AuthResult {
-        val success = repository.loginUserAccount(email, pass)
+        val success = userRepository.loginUserAccount(email, pass)
         if (success) {
-            val isVerified = repository.isEmailVerified(email)
+            val isVerified = userRepository.isEmailVerified(email)
             if (isVerified) {
-                _isLoggedIn.value = true
+                AuthViewModel.isLoggedInState.value = true
                 val prefs = getApplication<Application>().getSharedPreferences("StayEase_Prefs", android.content.Context.MODE_PRIVATE)
                 prefs.edit().putBoolean("remember_me_login", rememberMe).apply()
                 return AuthResult.Success
@@ -54,14 +45,14 @@ class HotelViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun googleSignIn(email: String, name: String, avatarUrl: String, rememberMe: Boolean = true) {
-        repository.googleSignInAccount(email, name, avatarUrl)
-        _isLoggedIn.value = true
+        userRepository.googleSignInAccount(email, name, avatarUrl)
+        AuthViewModel.isLoggedInState.value = true
         val prefs = getApplication<Application>().getSharedPreferences("StayEase_Prefs", android.content.Context.MODE_PRIVATE)
         prefs.edit().putBoolean("remember_me_login", rememberMe).apply()
     }
 
     fun verifyEmailCode(email: String): Boolean {
-        repository.markEmailVerified(email)
+        userRepository.markEmailVerified(email)
         return true
     }
 
@@ -101,7 +92,7 @@ class HotelViewModel(application: Application) : AndroidViewModel(application) {
 
     // Reactive filter result
     val filteredHotels: StateFlow<List<HotelModel>> = combine(
-        repository.hotels,
+        hotelRepository.hotels,
         searchStateFlow,
         filterStateFlow
     ) { hotels, search, filter ->
@@ -126,30 +117,30 @@ class HotelViewModel(application: Application) : AndroidViewModel(application) {
 
     // Wishlist selector state
     val wishlistHotels: StateFlow<List<HotelModel>> = combine(
-        repository.hotels,
-        repository.wishlist
+        hotelRepository.hotels,
+        favoriteRepository.wishlist
     ) { hotels, wishlist ->
         hotels.filter { wishlist.contains(it.id) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Language in Vietnamese/English
-    val currentLang: StateFlow<String> = repository.currentUser.map { it.language }
+    val currentLang: StateFlow<String> = userRepository.currentUser.map { it.language }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "VI")
 
     // Active User
-    val currentUser: StateFlow<UserModel> = repository.currentUser
+    val currentUser: StateFlow<UserModel> = userRepository.currentUser
 
     // Available coupons
-    val coupons: StateFlow<List<CouponModel>> = repository.coupons
+    val coupons: StateFlow<List<CouponModel>> = hotelRepository.coupons
 
     // Bookings history
-    val bookings: StateFlow<List<BookingModel>> = repository.bookings
+    val bookings: StateFlow<List<BookingModel>> = bookingRepository.bookings
 
     // Chat support messages
-    val chatMessages: StateFlow<List<MessageModel>> = repository.chatMessages
+    val chatMessages: StateFlow<List<MessageModel>> = hotelRepository.chatMessages
 
     // Recent Searches management
-    val recentSearches: StateFlow<List<String>> = repository.recentSearches
+    val recentSearches: StateFlow<List<String>> = hotelRepository.recentSearches
 
     fun setCity(city: String) {
         searchCity.value = city
@@ -182,43 +173,47 @@ class HotelViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleWishlist(hotelId: String) {
-        repository.toggleWishlist(hotelId)
+        favoriteRepository.toggleWishlist(hotelId)
     }
 
     fun updateProfile(name: String, email: String, phone: String) {
-        repository.updateProfile(name, email, phone)
+        userRepository.updateProfile(name, email, phone)
+    }
+
+    fun updateAvatarUrl(url: String) {
+        userRepository.updateAvatarUrl(url)
     }
 
     fun setLanguage(lang: String) {
-        repository.setLanguage(lang)
+        userRepository.setLanguage(lang)
     }
 
     fun toggleDarkMode(enabled: Boolean) {
-        repository.setDarkMode(enabled)
+        userRepository.setDarkMode(enabled)
     }
 
     fun addReview(hotelId: String, rating: Float, comment: String) {
-        repository.addReview(hotelId, rating, comment)
+        hotelRepository.addReview(hotelId, rating, comment)
     }
 
     fun getReviewsForHotel(hotelId: String): Flow<List<ReviewModel>> {
-        return repository.reviews.map { list -> list.filter { it.hotelId == hotelId } }
+        return hotelRepository.reviews.map { list -> list.filter { it.hotelId == hotelId } }
     }
 
     fun getRoomsForHotel(hotelId: String): Flow<List<RoomModel>> {
-        return repository.rooms.map { list -> list.filter { it.hotelId == hotelId } }
+        return hotelRepository.rooms.map { list -> list.filter { it.hotelId == hotelId } }
     }
 
     fun getHotelById(hotelId: String): HotelModel? {
-        return repository.hotels.value.firstOrNull { it.id == hotelId }
+        return hotelRepository.hotels.value.firstOrNull { it.id == hotelId }
     }
 
     fun getRoomById(roomId: String): RoomModel? {
-        return repository.rooms.value.firstOrNull { it.id == roomId }
+        return hotelRepository.rooms.value.firstOrNull { it.id == roomId }
     }
 
     fun applyCoupon(code: String, subtotal: Double): Double {
-        val coupon = repository.coupons.value.firstOrNull { it.code.equals(code, ignoreCase = true) }
+        val coupon = hotelRepository.coupons.value.firstOrNull { it.code.equals(code, ignoreCase = true) }
         if (coupon != null && subtotal >= coupon.minSpend) {
             val maxDiscount = coupon.maxDiscount
             val calculated = subtotal * (coupon.discountPercent / 100.0)
@@ -266,55 +261,58 @@ class HotelViewModel(application: Application) : AndroidViewModel(application) {
             paymentMethod = paymentMethod
         )
 
-        repository.createBooking(b)
+        bookingRepository.createBooking(b)
         return b
     }
 
     fun cancelBooking(bookingId: String) {
-        repository.updateBookingStatus(bookingId, BookingStatus.CANCELLED)
+        bookingRepository.updateBookingStatus(bookingId, BookingStatus.CANCELLED)
     }
 
     fun sendSupportChat(message: String) {
-        repository.addChatMessage(message)
+        hotelRepository.addChatMessage(message)
     }
 
     // AUTH SIMULATION
     fun register(name: String, email: String, phone: String, pass: String) {
-        repository.registerUserAccount(name, email, phone, pass)
-        _isLoggedIn.value = true
+        userRepository.registerUserAccount(name, email, phone, pass)
+        AuthViewModel.isLoggedInState.value = true
     }
 
     fun login(email: String, pass: String): Boolean {
-        val success = repository.loginUserAccount(email, pass)
+        val success = userRepository.loginUserAccount(email, pass)
         if (success) {
-            _isLoggedIn.value = true
+            AuthViewModel.isLoggedInState.value = true
         }
         return success
     }
 
     fun logout() {
-        _isLoggedIn.value = false
+        AuthViewModel.isLoggedInState.value = false
         val prefs = getApplication<Application>().getSharedPreferences("StayEase_Prefs", android.content.Context.MODE_PRIVATE)
         prefs.edit().putBoolean("remember_me_login", false).apply()
     }
 
     fun forgotPassword(email: String, newPass: String): Boolean {
-        repository.savePassword(email, newPass)
+        userRepository.savePassword(email, newPass)
         return true
     }
 
     fun changePassword(oldPass: String, newPass: String): Boolean {
         val currentEmail = currentUser.value.email
-        val currentSavedPass = repository.getPassword(currentEmail)
+        val currentSavedPass = userRepository.getPassword(currentEmail)
         if (currentSavedPass == oldPass) {
-            repository.savePassword(currentEmail, newPass)
+            userRepository.savePassword(currentEmail, newPass)
+            if (currentUser.value.email.trim().lowercase() == currentEmail.trim().lowercase()) {
+                // Keep synchronized
+            }
             return true
         }
         return false
     }
 
     // Admin Panel Analytics
-    val adminStats: Flow<Map<String, Any>> = repository.bookings.map { list ->
+    val adminStats: Flow<Map<String, Any>> = bookingRepository.bookings.map { list ->
         val completed = list.filter { it.status == BookingStatus.COMPLETED || it.status == BookingStatus.CONFIRMED }
         val revenue = completed.sumOf { it.totalAmount }
         val bookingsCount = list.size
@@ -326,14 +324,14 @@ class HotelViewModel(application: Application) : AndroidViewModel(application) {
             "bookingsCount" to bookingsCount,
             "activeBookings" to activeCount,
             "cancelledBookings" to cancelledCount,
-            "hotelsCount" to repository.hotels.value.size,
-            "roomsCount" to repository.rooms.value.size
+            "hotelsCount" to hotelRepository.hotels.value.size,
+            "roomsCount" to hotelRepository.rooms.value.size
         )
     }
 
     // Voice search simulated feedback
     fun handleVoiceInput(word: String): String {
-        val detected = repository.searchByVoiceMock(word)
+        val detected = hotelRepository.searchByVoiceMock(word)
         searchCity.value = detected
         return detected
     }
@@ -355,15 +353,15 @@ class HotelViewModel(application: Application) : AndroidViewModel(application) {
             latitude = 21.0,
             longitude = 105.0
         )
-        repository.addHotel(nh)
+        hotelRepository.addHotel(nh)
     }
 
     fun updateAdminHotel(hotel: HotelModel) {
-        repository.updateHotel(hotel)
+        hotelRepository.updateHotel(hotel)
     }
 
     fun deleteAdminHotel(hotelId: String) {
-        repository.deleteHotel(hotelId)
+        hotelRepository.deleteHotel(hotelId)
     }
 
     fun createAdminRoom(hotelId: String, name: String, price: Double, maxGuests: Int, sizeSqm: Int, description: String) {
@@ -379,10 +377,10 @@ class HotelViewModel(application: Application) : AndroidViewModel(application) {
             imageUrls = listOf("https://images.unsplash.com/photo-1611891405112-700df06ad678?auto=format&fit=crop&w=600&q=80"),
             amenities = listOf("Wifi", "Minibar", "Air Conditioning")
         )
-        repository.addRoom(nr)
+        hotelRepository.addRoom(nr)
     }
 
     fun deleteAdminRoom(roomId: String) {
-        repository.deleteRoom(roomId)
+        hotelRepository.deleteRoom(roomId)
     }
 }
