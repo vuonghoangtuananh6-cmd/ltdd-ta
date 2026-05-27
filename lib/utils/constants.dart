@@ -1,3 +1,5 @@
+// lib/utils/constants.dart
+
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -26,6 +28,18 @@ class AppColors {
   static const Color purpleLight = Color(0xFFFAF5FF);
 }
 
+class AppConstants {
+  static const String appName = 'StayEase';
+  static const String prefsKey = 'StayEase_Prefs';
+
+  // Common Key Strings inside SharedPreferences / Storage
+  static const String keyCurrentUser = 'current_user';
+  static const String keyFavorites = 'favorites_list';
+  static const String keyBookings = 'bookings_list';
+  static const String keyLanguage = 'app_language';
+  static const String keyIsDarkMode = 'is_dark_mode';
+}
+
 class AppRoutes {
   static const String splash = '/splash';
   static const String login = '/login';
@@ -39,4 +53,5 @@ class AppRoutes {
   static const String editProfile = '/edit_profile';
   static const String changePassword = '/change_password';
   static const String admin = '/admin';
+  static const String wishlist = '/wishlist';
 }

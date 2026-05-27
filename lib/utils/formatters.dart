@@ -1,3 +1,5 @@
+// lib/utils/formatters.dart
+
 import 'package:intl/intl.dart';
 
 String formatPrice(double price) {

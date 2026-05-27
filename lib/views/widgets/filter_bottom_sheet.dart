@@ -109,12 +109,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           // Stars Rating
           const Text('Hạng khách sạn', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [3, 4, 5].map((s) {
-              final selected = _stars.contains(s);
-              return Expanded(
-                child: GestureDetector(
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [1, 2, 3, 4, 5].map((s) {
+                final selected = _stars.contains(s);
+                return GestureDetector(
                   onTap: () {
                     setState(() {
                       if (_stars.contains(s)) {
@@ -125,7 +125,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     });
                   },
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: 60,
+                    margin: const EdgeInsets.only(right: 8),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       color: selected ? AppColors.primaryLight : AppColors.slate50,
@@ -143,9 +144,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       ],
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
           const SizedBox(height: 16),
           // Amenities

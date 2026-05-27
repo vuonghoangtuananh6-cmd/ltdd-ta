@@ -11,6 +11,7 @@ class HomeController extends ChangeNotifier {
   HomeController._internal() {
     UserRepository.init();
     HotelRepository.init();
+    UserRepository.currentUser.addListener(notifyListeners);
   }
 
   User get currentUser => UserRepository.currentUser.value;

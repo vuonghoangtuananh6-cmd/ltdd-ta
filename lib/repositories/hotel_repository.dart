@@ -16,15 +16,16 @@ class HotelRepository {
   static final rooms = ValueNotifier<List<Room>>([]);
   static final reviews = ValueNotifier<List<Review>>([]);
   static final coupons = ValueNotifier<List<Coupon>>([]);
-  static final chatMessages = ValueNotifier<List<Message>>([]);
-  static final recentSearches = ValueNotifier<List<String>>([]);
+  static ValueNotifier<List<Message>> get chatMessages => UserRepository.chatMessages;
+  static ValueNotifier<List<String>> get recentSearches => UserRepository.recentSearches;
 
   static bool _isInitialized = false;
 
   static void init() {
     if (!_isInitialized) {
-      // Initialize Favorite Repository
+      // Initialize Favorite and User Repository
       FavoriteRepository.init();
+      UserRepository.init();
 
       // Load Hotels
       final savedHotels = DatabaseHelper.loadList<Hotel>('saved_hotels', (json) => Hotel.fromJson(json));
@@ -58,21 +59,6 @@ class HotelRepository {
         coupons.value = _loadDefaultCoupons();
         _saveCoupons();
       }
-
-      // Chat
-      chatMessages.value = [
-        Message(
-          id: 'msg_welcome',
-          senderId: 'admin',
-          senderName: 'StayEase Support',
-          isFromAdmin: true,
-          content: 'Xin chào! StayEase rất hân hạnh được hỗ trợ bạn. Bạn cần tìm phòng tại địa điểm nào ạ?',
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        )
-      ];
-
-      // Searches
-      recentSearches.value = ["Hà Nội", "Đà Nẵng", "Phú Quốc"];
 
       _isInitialized = true;
 
@@ -220,44 +206,7 @@ class HotelRepository {
   }
 
   static void addChatMessage(String content) {
-    UserRepository.init();
-    final user = UserRepository.currentUser.value;
-    final userMsg = Message(
-      id: const Uuid().v4(),
-      senderId: user.id,
-      senderName: user.name,
-      isFromAdmin: false,
-      content: content,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-    );
-
-    chatMessages.value = [...chatMessages.value, userMsg];
-
-    final String botResponse;
-    final text = content.toLowerCase();
-    if (text.contains("đặt phòng") || text.contains("booking")) {
-      botResponse = "Bạn có thể đặt phòng trực tiếp qua trang chi tiết của mỗi khách sạn! Chọn ngày nhận/trả và phòng mong muốn, sau đó click Đặt Ngay.";
-    } else if (text.contains("khuyến mãi") || text.contains("mã giảm") || text.contains("sale")) {
-      botResponse = "StayEase đang áp dụng mã giảm giá ưu đãi 'STAYEASE200K' (giảm 200k) và 'WELCOME500K' (giảm 500k). Nhập mã khi thanh toán để được giảm trừ nhé!";
-    } else if (text.contains("hà nội") || text.contains("hanoi")) {
-      botResponse = "Hà Nội đang có khách sạn sang trọng *Sofitel Legend Metropole Hanoi* cực kì cổ kính và cuốn hút. Bạn có muốn đặt phòng tại đây?";
-    } else if (text.contains("hoàn tiền") || text.contains("hủy phòng")) {
-      botResponse = "Chính sách hủy phòng linh hoạt áp dụng trước 24 giờ kể từ ngày check-in. Bạn có thể bấm nút Hủy trực tiếp trong Lịch Sử Đặt Phòng.";
-    } else {
-      botResponse = "Cảm ơn câu hỏi từ quý khách. Đội ngũ StayEase đã nhận được thông tin yêu cầu tư vấn đặt phòng của bạn và sẽ liên hệ ngay qua SĐT: ${user.phoneNumber}. Bạn còn cần hỗ trợ gì khác không?";
-    }
-
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      final adminMsg = Message(
-        id: const Uuid().v4(),
-        senderId: 'admin',
-        senderName: 'StayEase Support',
-        isFromAdmin: true,
-        content: botResponse,
-        timestamp: DateTime.now().millisecondsSinceEpoch,
-      );
-      chatMessages.value = [...chatMessages.value, adminMsg];
-    });
+    UserRepository.addChatMessage(content);
   }
 
   // Admin CRUD

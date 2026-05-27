@@ -7,9 +7,17 @@ import '../../utils/formatters.dart';
 
 class HotelCard extends StatelessWidget {
   final Hotel hotel;
+  final bool? isWishlisted;
   final VoidCallback? onTap;
+  final VoidCallback? onWishlistToggle;
 
-  const HotelCard({super.key, required this.hotel, this.onTap});
+  const HotelCard({
+    super.key,
+    required this.hotel,
+    this.isWishlisted,
+    this.onTap,
+    this.onWishlistToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -54,26 +62,43 @@ class HotelCard extends StatelessWidget {
                 Positioned(
                   top: 12,
                   right: 12,
-                  child: ValueListenableBuilder<Set<String>>(
-                    valueListenable: favoriteController.wishlistNotifier,
-                    builder: (context, wishlist, child) {
-                      final isFav = wishlist.contains(hotel.id);
-                      return GestureDetector(
-                        onTap: () {
-                          favoriteController.toggleWishlist(hotel.id);
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 18,
-                          child: Icon(
-                            isFav ? Icons.favorite : Icons.favorite_border,
-                            color: isFav ? Colors.red : AppColors.slate600,
-                            size: 20,
+                  child: isWishlisted != null
+                      ? GestureDetector(
+                          onTap: onWishlistToggle,
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 18,
+                            child: Icon(
+                              isWishlisted! ? Icons.favorite : Icons.favorite_border,
+                              color: isWishlisted! ? Colors.red : AppColors.slate600,
+                              size: 20,
+                            ),
                           ),
+                        )
+                      : ValueListenableBuilder<Set<String>>(
+                          valueListenable: favoriteController.wishlistNotifier,
+                          builder: (context, wishlist, child) {
+                            final isFav = wishlist.contains(hotel.id);
+                            return GestureDetector(
+                              onTap: () {
+                                if (onWishlistToggle != null) {
+                                  onWishlistToggle!();
+                                } else {
+                                  favoriteController.toggleWishlist(hotel.id);
+                                }
+                              },
+                              child: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                radius: 18,
+                                child: Icon(
+                                  isFav ? Icons.favorite : Icons.favorite_border,
+                                  color: isFav ? Colors.red : AppColors.slate600,
+                                  size: 20,
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ),
                 if (hotel.isFeatured)
                   Positioned(

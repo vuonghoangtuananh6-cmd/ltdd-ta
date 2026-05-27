@@ -1,3 +1,5 @@
+// lib/models/review.dart
+
 import 'package:uuid/uuid.dart';
 
 class Review {
@@ -18,6 +20,26 @@ class Review {
     required this.comment,
     required this.date,
   });
+
+  Review copyWith({
+    String? id,
+    String? hotelId,
+    String? userName,
+    String? userAvatar,
+    double? rating,
+    String? comment,
+    String? date,
+  }) {
+    return Review(
+      id: id ?? this.id,
+      hotelId: hotelId ?? this.hotelId,
+      userName: userName ?? this.userName,
+      userAvatar: userAvatar ?? this.userAvatar,
+      rating: rating ?? this.rating,
+      comment: comment ?? this.comment,
+      date: date ?? this.date,
+    );
+  }
 
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(

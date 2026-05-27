@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
 import '../../controllers/booking_controller.dart';
+import '../../models/booking.dart';
 import '../../utils/constants.dart';
 
 class CancelBookingButton extends StatelessWidget {
-  final String bookingId;
+  final String? bookingId;
+  final Booking? booking;
   final VoidCallback? onCancelSuccess;
+  final VoidCallback? onConfirm;
 
-  const CancelBookingButton({super.key, required this.bookingId, this.onCancelSuccess});
+  const CancelBookingButton({
+    super.key,
+    this.bookingId,
+    this.booking,
+    this.onCancelSuccess,
+    this.onConfirm,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (booking != null) {
+      final status = booking!.status;
+      if (status != BookingStatus.CONFIRMED && status != BookingStatus.PENDING) {
+        return const SizedBox.shrink();
+      }
+    }
+
     final bookingController = BookingController();
+    final actualBookingId = bookingId ?? booking?.id ?? '';
 
     return OutlinedButton(
       onPressed: () {
@@ -26,8 +43,11 @@ class CancelBookingButton extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  bookingController.cancelBooking(bookingId);
+                  bookingController.cancelBooking(actualBookingId);
                   Navigator.pop(context);
+                  if (onConfirm != null) {
+                    onConfirm!();
+                  }
                   if (onCancelSuccess != null) {
                     onCancelSuccess!();
                   }

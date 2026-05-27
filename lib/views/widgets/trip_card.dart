@@ -7,12 +7,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 class TripCard extends StatelessWidget {
   final Booking booking;
+  final VoidCallback? onTap;
   final VoidCallback? onTapDetail;
   final VoidCallback? onCancelSuccess;
 
   const TripCard({
     super.key,
     required this.booking,
+    this.onTap,
     this.onTapDetail,
     this.onCancelSuccess,
   });
@@ -52,7 +54,7 @@ class TripCard extends StatelessWidget {
         ],
       ),
       child: InkWell(
-        onTap: onTapDetail,
+        onTap: onTap ?? onTapDetail,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(12),

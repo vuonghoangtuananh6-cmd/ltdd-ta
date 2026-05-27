@@ -1,3 +1,5 @@
+// lib/models/hotel.dart
+
 class Hotel {
   final String id;
   final String name;

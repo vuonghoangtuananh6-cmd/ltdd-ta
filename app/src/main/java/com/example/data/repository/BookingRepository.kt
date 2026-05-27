@@ -15,6 +15,7 @@ interface BookingRepository {
     fun createBooking(booking: BookingModel)
     fun updateBookingStatus(bookingId: String, status: BookingStatus)
     fun saveBookings()
+    fun updateBookingsList(list: List<BookingModel>)
 }
 
 class BookingRepositoryImpl(private val context: Context) : BookingRepository {
@@ -72,6 +73,11 @@ class BookingRepositoryImpl(private val context: Context) : BookingRepository {
         val list = _bookings.value.map {
             if (it.id == bookingId) it.copy(status = status) else it
         }
+        _bookings.value = list
+        saveBookings()
+    }
+
+    override fun updateBookingsList(list: List<BookingModel>) {
         _bookings.value = list
         saveBookings()
     }

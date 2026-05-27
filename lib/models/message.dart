@@ -1,3 +1,5 @@
+// lib/models/message.dart
+
 import 'package:uuid/uuid.dart';
 
 class Message {
@@ -16,6 +18,24 @@ class Message {
     required this.content,
     required this.timestamp,
   });
+
+  Message copyWith({
+    String? id,
+    String? senderId,
+    String? senderName,
+    bool? isFromAdmin,
+    String? content,
+    int? timestamp,
+  }) {
+    return Message(
+      id: id ?? this.id,
+      senderId: senderId ?? this.senderId,
+      senderName: senderName ?? this.senderName,
+      isFromAdmin: isFromAdmin ?? this.isFromAdmin,
+      content: content ?? this.content,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(

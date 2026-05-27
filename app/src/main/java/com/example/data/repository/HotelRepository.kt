@@ -301,12 +301,7 @@ class HotelRepositoryImpl(private val context: Context) : HotelRepository {
                     
                     if (newBookingsList.isNotEmpty()) {
                         val bookingRepository = BookingRepositoryImpl(context)
-                        // This updates booking repository flow safely!
-                        val field = BookingRepositoryImpl.Companion::class.java.getDeclaredField("_bookings")
-                        field.isAccessible = true
-                        val mFlow = field.get(null) as MutableStateFlow<List<BookingModel>>
-                        mFlow.value = newBookingsList
-                        bookingRepository.saveBookings()
+                        bookingRepository.updateBookingsList(newBookingsList)
                     }
                 }
             } catch (e: Exception) {

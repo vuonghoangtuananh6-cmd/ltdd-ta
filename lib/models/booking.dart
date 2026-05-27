@@ -1,3 +1,5 @@
+// lib/models/booking.dart
+
 enum BookingStatus {
   PENDING, CONFIRMED, CANCELLED, COMPLETED
 }

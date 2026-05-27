@@ -4,15 +4,25 @@ import '../../../controllers/auth_controller.dart';
 import '../../../utils/constants.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
-  final String email;
+  final String? email;
 
-  const VerifyEmailScreen({super.key, required this.email});
+  const VerifyEmailScreen({super.key, this.email});
 
   @override
   State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
 }
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
+  String get _email {
+    if (widget.email != null && widget.email!.isNotEmpty) {
+      return widget.email!;
+    }
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is String && args.isNotEmpty) {
+      return args;
+    }
+    return "vuonghoangtuananh6@gmail.com";
+  }
   int _countdown = 60;
   Timer? _timer;
   bool _isSending = false;
@@ -64,7 +74,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       _isSending = true;
     });
     await Future.delayed(const Duration(milliseconds: 1200));
-    _authController.verifyEmailCode(widget.email);
+    _authController.verifyEmailCode(_email);
     setState(() {
       _isSending = false;
     });
@@ -120,7 +130,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                widget.email,
+                _email,
                 style: const TextStyle(color: Color(0xFFF97316), fontSize: 16, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),

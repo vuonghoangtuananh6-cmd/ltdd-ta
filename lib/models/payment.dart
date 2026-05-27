@@ -1,3 +1,5 @@
+// lib/models/payment.dart
+
 import 'package:uuid/uuid.dart';
 
 class Payment {
@@ -16,6 +18,24 @@ class Payment {
     this.status = "SUCCESS",
     required this.timestamp,
   });
+
+  Payment copyWith({
+    String? id,
+    String? bookingId,
+    String? paymentMethod,
+    double? amount,
+    String? status,
+    int? timestamp,
+  }) {
+    return Payment(
+      id: id ?? this.id,
+      bookingId: bookingId ?? this.bookingId,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      amount: amount ?? this.amount,
+      status: status ?? this.status,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
 
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(

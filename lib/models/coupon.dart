@@ -1,3 +1,5 @@
+// lib/models/coupon.dart
+
 class Coupon {
   final String code;
   final String description;
@@ -12,6 +14,22 @@ class Coupon {
     required this.maxDiscount,
     required this.minSpend,
   });
+
+  Coupon copyWith({
+    String? code,
+    String? description,
+    int? discountPercent,
+    double? maxDiscount,
+    double? minSpend,
+  }) {
+    return Coupon(
+      code: code ?? this.code,
+      description: description ?? this.description,
+      discountPercent: discountPercent ?? this.discountPercent,
+      maxDiscount: maxDiscount ?? this.maxDiscount,
+      minSpend: minSpend ?? this.minSpend,
+    );
+  }
 
   factory Coupon.fromJson(Map<String, dynamic> json) {
     return Coupon(

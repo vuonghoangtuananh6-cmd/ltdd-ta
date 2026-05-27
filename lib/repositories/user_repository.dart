@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../models/user.dart';
+import '../models/message.dart';
 import '../service/prefs_helper.dart';
 
 class UserRepository {
   static final currentUser = ValueNotifier<User>(User());
+  static final recentSearches = ValueNotifier<List<String>>(["Hà Nội", "Đà Nẵng", "Phú Quốc"]);
+  static final chatMessages = ValueNotifier<List<Message>>([]);
   static bool _isInitialized = false;
 
   static void init() {
@@ -18,8 +21,66 @@ class UserRepository {
       } else {
         currentUser.value = User();
       }
+
+      final savedSearches = PrefsHelper.prefs.getStringList("recent_searches");
+      if (savedSearches != null) {
+        recentSearches.value = savedSearches;
+      }
+
+      chatMessages.value = [
+        Message(
+          id: 'msg_welcome',
+          senderId: 'admin',
+          senderName: 'StayEase Support',
+          isFromAdmin: true,
+          content: 'Xin chào! StayEase rất hân hạnh được hỗ trợ bạn. Bạn cần tìm phòng tại địa điểm nào ạ?',
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        )
+      ];
+
       _isInitialized = true;
     }
+  }
+
+  static void addChatMessage(String content) {
+    init();
+    final user = currentUser.value;
+    final userMsg = Message(
+      id: const Uuid().v4(),
+      senderId: user.id,
+      senderName: user.name,
+      isFromAdmin: false,
+      content: content,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    chatMessages.value = [...chatMessages.value, userMsg];
+
+    final String botResponse;
+    final text = content.toLowerCase();
+    if (text.contains("đặt phòng") || text.contains("booking")) {
+      botResponse = "Bạn có thể đặt phòng trực tiếp qua trang chi tiết của mỗi khách sạn! Chọn ngày nhận/trả và phòng mong muốn, sau đó click Đặt Ngay.";
+    } else if (text.contains("khuyến mãi") || text.contains("mã giảm") || text.contains("sale")) {
+      botResponse = "StayEase đang áp dụng mã giảm giá ưu đãi 'STAYEASE200K' (giảm 200k) và 'WELCOME500K' (giảm 500k). Nhập mã khi thanh toán để được giảm trừ nhé!";
+    } else if (text.contains("hà nội") || text.contains("hanoi")) {
+      botResponse = "Hà Nội đang có khách sạn sang trọng *Sofitel Legend Metropole Hanoi* cực kì cổ kính và cuốn hút. Bạn có muốn đặt phòng tại đây?";
+    } else if (text.contains("hoàn tiền") || text.contains("hủy phòng")) {
+      botResponse = "Chính sách hủy phòng linh hoạt áp dụng trước 24 giờ kể từ ngày check-in. Bạn có thể bấm nút Hủy trực tiếp trong Lịch Sử Đặt Phòng.";
+    } else {
+      botResponse = "Cảm ơn câu hỏi từ quý khách. Đội ngũ StayEase đã nhận được thông tin yêu cầu tư vấn đặt phòng của bạn và sẽ liên hệ ngay qua SĐT: ${user.phoneNumber}. Bạn còn cần hỗ trợ gì khác không?";
+    }
+
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      final adminMsg = Message(
+        id: const Uuid().v4(),
+        senderId: 'admin',
+        senderName: 'StayEase Support',
+        isFromAdmin: true,
+        content: botResponse,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      );
+      chatMessages.value = [...chatMessages.value, adminMsg];
+    });
   }
 
   static void saveUser() {

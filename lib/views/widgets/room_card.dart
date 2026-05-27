@@ -6,9 +6,17 @@ import '../../utils/formatters.dart';
 
 class RoomCard extends StatelessWidget {
   final Room room;
+  final VoidCallback? onBook;
   final VoidCallback? onPlaySelected;
+  final VoidCallback? onTap;
 
-  const RoomCard({super.key, required this.room, this.onPlaySelected});
+  const RoomCard({
+    super.key,
+    required this.room,
+    this.onBook,
+    this.onPlaySelected,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +129,7 @@ class RoomCard extends StatelessWidget {
                       ],
                     ),
                     ElevatedButton(
-                      onPressed: onPlaySelected,
+                      onPressed: onTap ?? onBook ?? onPlaySelected,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.orange,
                         foregroundColor: Colors.white,

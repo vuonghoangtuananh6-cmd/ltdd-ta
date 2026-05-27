@@ -3,6 +3,10 @@ import '../models/user.dart';
 import 'dart:convert';
 
 class PrefsHelper {
+  static final PrefsHelper _instance = PrefsHelper._internal();
+  factory PrefsHelper() => _instance;
+  PrefsHelper._internal();
+
   static late SharedPreferences _prefs;
 
   static Future<void> init() async {
@@ -52,5 +56,9 @@ class PrefsHelper {
 
   static Future<bool> setStringList(String key, List<String> value) {
     return _prefs.setStringList(key, value);
+  }
+
+  static Future<bool> remove(String key) {
+    return _prefs.remove(key);
   }
 }

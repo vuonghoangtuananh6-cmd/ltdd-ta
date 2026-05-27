@@ -7,10 +7,18 @@ class FavoriteRepository {
 
   static void init() {
     if (!_isInitialized) {
-      final list = PrefsHelper.prefs.getStringList("wishlist_hotel_ids") ?? [];
-      wishlist.value = list.toSet();
+      loadWishlist();
       _isInitialized = true;
     }
+  }
+
+  static void loadWishlist() {
+    final list = PrefsHelper.prefs.getStringList("wishlist_hotel_ids") ?? [];
+    wishlist.value = list.toSet();
+  }
+
+  static void saveWishlist() {
+    PrefsHelper.prefs.setStringList("wishlist_hotel_ids", wishlist.value.toList());
   }
 
   static void toggleWishlist(String hotelId) {
@@ -21,6 +29,6 @@ class FavoriteRepository {
       updated.add(hotelId);
     }
     wishlist.value = updated;
-    PrefsHelper.prefs.setStringList("wishlist_hotel_ids", updated.toList());
+    saveWishlist();
   }
 }
